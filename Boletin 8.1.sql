@@ -46,14 +46,35 @@ SELECT SupplierID, SUM(UnitPrice * UnitsInStock) AS [Importe total de stock]
 	GROUP BY SupplierID
 
 --7. Número de pedidos registrados mes a mes de cada año.
+SELECT * FROM Orders
+
+SELECT year(OrderDate) AS Año, month(OrderDate) AS Mes,COUNT(*) AS [Numero de pedidos]
+	FROM Orders
+	GROUP BY month(OrderDate), year(OrderDate)
+	ORDER BY Año, Mes
 
 
+--8. Año y tiempo medio transcurrido entre la fecha de cada pedido (OrderDate) y 
+--la fecha en la que lo hemos enviado (ShipDate), en días para cada año.
+SELECT * FROM Orders
 
---8. Año y tiempo medio transcurrido entre la fecha de cada pedido (OrderDate) y la fecha en la que lo hemos enviado (ShipDate), en días para cada año.
-
+SELECT year(OrderDate) AS 'Año', AVG(day(ShippedDate - OrderDate)) AS [Tiempo medio]
+	FROM Orders
+	GROUP BY year(OrderDate)
+	ORDER BY year(OrderDate)
 
 --9. ID del distribuidor y número de pedidos enviados a través de ese distribuidor.
+SELECT * FROM Orders
 
+SELECT ShipVia, COUNT(*) AS [Numero de pedidos]
+	FROM Orders
+	GROUP BY ShipVia
+	ORDER BY ShipVia
 
 --10. ID de cada proveedor y número de productos distintos que nos suministra.
+SELECT * FROM Products
 
+SELECT SupplierID, COUNT (*) AS [Numero de productos]
+	FROM Products
+	GROUP BY SupplierID
+	ORDER BY SupplierID

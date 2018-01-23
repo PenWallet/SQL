@@ -20,6 +20,15 @@ SELECT * FROM HumanResources.Employee
 
 -- Ejercicio 4: LoginID, nationalIDNumber, edad y puesto de trabajo (jobTitle) de los empleados
 -- (tabla Employees) de sexo femenino que tengan más de cinco años de antigüedad
-
+SELECT LoginID, NationalIDNumber, (year(CURRENT_TIMESTAMP) - year(BirthDate)) AS Age, JobTitle
+	FROM HumanResources.Employee
+	WHERE Gender = 'M' AND (year(CURRENT_TIMESTAMP) - year(HireDate)) > 5
+	ORDER BY Age
 
 -- Ejercicio 5: Ciudades correspondientes a los estados 11, 14, 35 o 70, sin repetir. Usar la tabla Person.Address
+SELECT * FROM Person.Address WHERE StateProvinceID = 11 ORDER BY StateProvinceID
+
+SELECT DISTINCT(City), StateProvinceID
+	FROM Person.Address
+	WHERE StateProvinceID IN (11, 14, 35, 70)
+	ORDER BY StateProvinceID, City
