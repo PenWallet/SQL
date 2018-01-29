@@ -29,14 +29,51 @@ SELECT Name, ProductID, SellStartDate, ProductNumber, Size, Weight
 
 --4.Margen de beneficio de cada producto (Precio de venta menos el coste),
 --y porcentaje que supone respecto del precio de venta.
-SELECT * FROM Person.Person
+SELECT * FROM Production.Product
 
+SELECT ProductID, Name, ListPrice, StandardCost, ListPrice-StandardCost AS [Margen de Beneficio], ((ListPrice-StandardCost)/ListPrice)*100 AS [Porcentaje]
+	FROM Production.Product
+	WHERE ListPrice > 0
 
 --Consultas de dificultad media
 --5.Número de productos de cada categoría
+SELECT * FROM Production.Product
+
+SELECT ProductSubcategoryID, COUNT(*) AS [Numero de productos]
+	FROM Production.Product
+	GROUP BY ProductSubcategoryID
+	ORDER BY ProductSubcategoryID
+
 --6.Igual a la anterior, pero considerando las categorías generales (categorías de categorías).
---7.Número de unidades vendidas de cada producto cada año.
+SELECT * FROM Production.Product
+
+SELECT COUNT(PP.ProductID) AS [Numero de productos], PPC.ProductCategoryID
+	FROM Production.Product AS PP
+		INNER JOIN Production.ProductSubcategory AS PPS
+			ON PP.ProductSubcategoryID = PPS.ProductSubcategoryID
+		INNER JOIN Production.ProductCategory AS PPC
+			ON PPS.ProductCategoryID = PPC.ProductCategoryID
+	GROUP BY PPC.ProductCategoryID
+	ORDER BY PPC.ProductCategoryID
+
+--7.NúmSaero de unidades vendidas de cada producto cada año.
+SELECT * FROM Sales.SalesOrderDetail
+
+SELECT year(SOH.OrderDate) AS Año, SUM(SOD.OrderQty) AS [Cantidad vendida]
+	FROM Sales.SalesOrderDetail AS SOD
+		INNER JOIN Sales.SalesOrderHeader AS SOH
+			ON SOD.SalesOrderID = SOH.SalesOrderID
+	GROUP BY YEAR(SOH.OrderDate)
+
+
 --8.Nombre completo, compañía y total facturado a cada cliente
-SELECT * FROM Sales.Store
+SELECT * FROM Sales.Customer
+SELECT * FROM Person.Person
+
+SELECT LastName, MiddleName, FirstName, BusinessEntityID, 
+	FROM Person.Person AS PP
+		INNER JOIN Sales.Customer AS SC
+			ON PP.
+
 
 --9.Número de producto, nombre y precio de todos aquellos en cuya descripción aparezcan las palabras "race”, "competition” o "performance”
