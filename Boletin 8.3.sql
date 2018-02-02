@@ -67,13 +67,44 @@ SELECT year(SOH.OrderDate) AS Año, SUM(SOD.OrderQty) AS [Cantidad vendida]
 
 
 --8.Nombre completo, compañía y total facturado a cada cliente
-SELECT * FROM Sales.Customer
+SELECT * FROM Sales.Customer ORDER BY TerritoryID
 SELECT * FROM Person.Person
+SELECT * FROM Sales.SalesOrderHeader
 
-SELECT LastName, MiddleName, FirstName, BusinessEntityID, 
+SELECT PP.LastName, PP.MiddleName, PP.FirstName, PP.BusinessEntityID, SUM(SOH.TotalDue) AS [Total Debido]
 	FROM Person.Person AS PP
 		INNER JOIN Sales.Customer AS SC
-			ON PP.
+			ON PP.BusinessEntityID = SC.PersonID
+		INNER JOIN Sales.SalesOrderHeader AS SOH
+			ON SC.PersonID = SOH.CustomerID
+	GROUP BY LastName, MiddleName, FirstName, BusinessEntityID
+	ORDER BY LastName, MiddleName, FirstName
+
+--9.Número de producto, nombre y precio de todos aquellos en cuya descripción 
+--parezcan las palabras "race”, "competition” o "performance”
+-- De Product a ProductModel a ProductModelProductDescription, a ProductDescription
+SELECT * FROM Production.ProductDescription
+
+SELECT PP.ProductID, PP.Name, PP.ListPrice, PPD.Description
+	FROM Production.Product AS PP
+		INNER JOIN Production.ProductModel AS PPM
+			ON PP.ProductModelID = PPM.ProductModelID
+		INNER JOIN Production.ProductModelProductDescriptionCulture AS PPMPDC
+			ON PPM.ProductModelID = PPMPDC.ProductModelID
+		INNER JOIN Production.ProductDescription AS PPD
+			ON PPMPDC.ProductDescriptionID = PPD.ProductDescriptionID
+	WHERE PPD.Description NOT LIKE ('%race%''%competition%''%performance%')
+
+--10.Facturación total en cada país
+SELECT * FROM Sales.SalesTerritory
+
+SELECT ST.CountryRegionCode, SUM(SOH.TotalDue) AS [Total facturado]
+	FROM Sales.SalesTerritory AS ST
+		INNER JOIN Sales.SalesOrderHeader AS SOH
+			ON ST.TerritoryID = SOH.TerritoryID
+	GROUP BY CountryRegionCode
+
+--11.Facturación total en cada Estado
 
 
---9.Número de producto, nombre y precio de todos aquellos en cuya descripción aparezcan las palabras "race”, "competition” o "performance”
+--12.Margen medio de beneficios y total facturado en cada país
