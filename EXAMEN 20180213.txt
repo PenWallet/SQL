@@ -1,0 +1,5 @@
+DATEADD		Adds an interval to a date value in SQL Server.
+DATEDIFF	Calculates the difference between two dates in MySQL and SQL Server.
+DATEPART	Extracts a specific part of a date/time value in SQL Server.
+GETDATE		Retrieves database time in SQL Server.
+SYSDATE		Retrieves database time in Oracle and MySQL.
