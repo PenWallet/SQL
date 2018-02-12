@@ -141,22 +141,6 @@ SELECT ContactName, COUNT(*) AS [Numero de productos]
 --15. Vendedores (nombre y apellidos) que han vendido una mayor cantidad que la
 --media en US $ en el año 97.
 
-GO
-CREATE VIEW YerayCabron1 AS
-SELECT E.EmployeeID, SUM(OD.UnitPrice * OD.Quantity * (1-OD.Discount)) AS [Media US$]
-	FROM Employees AS E
-		INNER JOIN Orders AS O
-			ON E.EmployeeID = O.EmployeeID
-		INNER JOIN [Order Details] AS OD
-			ON O.OrderID = OD.OrderID
-	WHERE year(OrderDate) = 1997
-	GROUP BY E.EmployeeID
-GO
-
-SELECT YerayCabron1.EmployeeID, AVG(YerayCabron1.[Media US$])
-	FROM YerayCabron1
-	GROUP BY YerayCabron1.EmployeeID
-
 SELECT SUM(OD.UnitPrice * OD.Quantity * (1-OD.Discount))/COUNT(E.EmployeeID) AS [Media US$]
 	FROM Employees AS E
 		INNER JOIN Orders AS O
@@ -165,12 +149,13 @@ SELECT SUM(OD.UnitPrice * OD.Quantity * (1-OD.Discount))/COUNT(E.EmployeeID) AS 
 			ON O.OrderID = OD.OrderID
 	WHERE year(OrderDate) = 1997
 
-SELECT E.LastName, E.FirstName, 
+
+/*SELECT E.LastName, E.FirstName, 
 	FROM Employees AS E
 		INNER JOIN Orders AS O
 			ON E.EmployeeID = O.EmployeeID
 		INNER JOIN [Order Details] AS OD
-			ON O.OrderID = OD.OrderID
+			ON O.OrderID = OD.OrderID*/
 
 
 --16. Empleados que hayan aumentado su cifra de ventas más de un 10% entre dos
