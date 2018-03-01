@@ -12,6 +12,14 @@ SELECT * FROM Customers
 SELECT * FROM Shippers
 SELECT * FROM Products
 
+GO
+CREATE VIEW OrdersCustomers AS
+	SELECT * FROM Orders AS O
+	INNER JOIN Customers AS C
+		ON O.CustomerID = C.CustomerID
+GO
+DROP VIEW OrdersCustomers
+
 INSERT INTO Orders (CustomerID, EmployeeID, OrderDate, ShippedDate, ShipVia, Freight, ShipName, ShipAddress, ShipCity, ShipRegion, ShipPostalCode, ShipCountry)
 	VALUES 
 	(
@@ -29,14 +37,37 @@ INSERT INTO Orders (CustomerID, EmployeeID, OrderDate, ShippedDate, ShipVia, Fre
 		(SELECT Country FROM Customers WHERE ContactName = 'Rafael')
 	)
 
+GO
+CREATE VIEW NombreRandom2 AS
+	SELECT OD.OrderID, OD.ProductID, 
+		FROM Orders AS O
+		INNER JOIN [Order Details] AS OD
+			ON O.OrderID = OD.OrderID
+		INNER JOIN Products AS P
+			ON OD.ProductID = P.ProductID
+
+INSERT INTO [Order Details] (OrderID, ProductID, UnitPrice, Quantity, Discount)
+	VALUES
+	(
+		(SELECT O.OrderID FROM Orders AS O
+			INNER JOIN Customers AS C
+				ON O.CustomerID = C.CustomerID
+			WHERE C.ContactName = 'Rafael'),
+		(SELECT O. FROM Orders AS O
+			INNER JOIN [Order Details] AS OD
+				ON O.OrderID = OD.OrderID
+			INNER JOIN Products AS P
+				ON OD.ProductID = P.ProductID
+			WHERE 
+	
+
 
 
 --Ante la bajada de ventas producida por la crisis, hemos de adaptar nuestros precios según las siguientes reglas:
 	--Los productos de la categoría de bebidas (Beverages) que cuesten más de $10 reducen su precio en un dólar.
 	--Los productos de la categoría Lácteos que cuesten más de $5 reducen su precio en un 10%.
 	--Los productos de los que se hayan vendido menos de 200 unidades en el último año, reducen su precio en un 5%
-
-
+UPDATE 
 
 --Inserta un nuevo vendedor llamado Michael Trump. Asígnale los territorios de Louisville, Phoenix, Santa Cruz y Atlanta.
 
