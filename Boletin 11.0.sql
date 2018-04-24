@@ -15,6 +15,7 @@ RETURN (SELECT C.ID, C.Nombre, C.Sexo, C.FechaNacimiento, COUNT(CC.IDCarrera) AS
 					ON CC.IDCarrera = Ca.ID
 			WHERE Ca.Fecha BETWEEN @FInicio AND @FFin
 			GROUP BY C.ID, C.Nombre, C.Sexo, C.FechaNacimiento )
+GO
 --FIN FUNCIÓN
 
 SELECT * FROM LTCarreras
@@ -33,7 +34,7 @@ CREATE FUNCTION FnTotalApostadoCC (@IDCab smallint, @IDCar smallint)
 		END
 GO
 
-DROP FUNCTION FnTotalApostadoCC
+--DROP FUNCTION FnTotalApostadoCC
 
 SELECT dbo.FnTotalApostadoCC(1, 1)
 
@@ -65,10 +66,10 @@ SELECT dbo.FnPremioConseguido(3) AS Premio
 --Premio1 y Premio2) es el siguiente:
 
 --a.Se calcula el total de dinero apostado en esa carrera
---b.El valor de la columna Premio1 para cada caballo se calcula dividiendo el total de dinero apostado entre lo apostado a 
---ese caballo y se multiplica el resultado por 0.6
---c.El valor de la columna Premio2 para cada caballo se calcula dividiendo el total de dinero apostado entre lo apostado a 
---ese caballo y se multiplica el resultado por 0.2
+--b.El valor de la columna Premio1 para cada caballo se calcula dividiendo el total de dinero apostado entre (lo apostado a 
+--ese caballo) y se multiplica el resultado por 0.6
+--c.El valor de la columna Premio2 para cada caballo se calcula dividiendo el total de dinero apostado entre (lo apostado a 
+--ese caballo) y se multiplica el resultado por 0.2
 --d.Si a algún caballo no ha apostado nadie tanto el Premio1 como el Premio2 se ponen a 100.
 
 --Crea una función que devuelva una tabla con tres columnas: ID del caballo, Premio1 y Premio2.
@@ -76,4 +77,26 @@ SELECT dbo.FnPremioConseguido(3) AS Premio
 
 --Debes usar la función del Ejercicio 2. Si lo estimas oportuno puedes crear otras funciones para realizar parte de los cálculos.
 
+SELECT * FROM LTCarreras ORDER BY ID
 
+GO
+CREATE FUNCTION FnTotalApostado (@IDCarrera int)
+	RETURNS smallmoney AS
+		BEGIN
+			RETURN (SELECT SUM(Importe) AS TotalApostado
+						FROM LTApuestas
+							WHERE IDCarrera = @IDCarrera )
+		END
+GO
+
+GO
+CREATE FUNCTION FnCalcularPremios (@IDCarrera int)
+RETURNS TABLE AS
+RETURN (SELECT CC.IDCaballo, ((dbo.FnTotalApostado(@IDCarrera) / dbo.FnTotalApostadoCC(CC.IDCaballo, @IDCarrera)) * 0.6) AS Premio1, ((dbo.FnTotalApostado(@IDCarrera) / dbo.FnTotalApostadoCC(CC.IDCaballo, @IDCarrera)) * 0.2) AS Premio2
+		FROM LTCaballosCarreras AS CC
+			INNER JOIN LTApuestas AS A
+				ON CC.IDCaballo = A.IDCaballo AND CC.IDCarrera = A.IDCarrera
+		WHERE CC.IDCarrera = @IDCarrera )
+GO
+SELECT * FROM LTCaballosCarreras WHERE IDCarrera = 2 ORDER BY IDCaballo
+SELECT * FROM FnCalcularPremios(2) ORDER BY IDCaballo
