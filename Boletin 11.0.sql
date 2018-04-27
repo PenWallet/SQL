@@ -98,5 +98,31 @@ RETURN (SELECT CC.IDCaballo, ((dbo.FnTotalApostado(@IDCarrera) / dbo.FnTotalApos
 				ON CC.IDCaballo = A.IDCaballo AND CC.IDCarrera = A.IDCarrera
 		WHERE CC.IDCarrera = @IDCarrera )
 GO
+
 SELECT * FROM LTCaballosCarreras WHERE IDCarrera = 2 ORDER BY IDCaballo
 SELECT * FROM FnCalcularPremios(2) ORDER BY IDCaballo
+
+
+--5.Crea una función FnPalmares que reciba un ID de caballo y un rango de fechas y nos devuelva el palmarés de ese caballo en
+--ese intervalo de tiempo.
+
+--El palmarés es el número de victorias, segundos puestos, etc. Se devolverá una tabla con dos columnas: Posición y NumVeces,
+--que indicarán, respectivamente, cada una de las posiciones y las veces que el caballo ha obtenido ese resultado.
+
+--Queremos que aparezcan 8 filas con las posiciones de la 1 a la 8. Si el caballo nunca ha finalizado en alguna de esas
+--posiciones, aparecerá el valor 0 en la columna NumVeces.
+GO
+CREATE FUNCTION FnPalmares (@IDCaballo int)
+RETURNS TABLE AS
+RETURN (SELECT Posicion, COUNT(Posicion) AS NumeroVeces
+			FROM LTCaballosCarreras
+			WHERE IDCaballo = @IDCaballo
+			GROUP BY Posicion )
+GO
+
+
+
+SELECT Posicion, SUM(Posicion) AS NumVeces
+	FROM LTCaballosCarreras
+	WHERE IDCaballo = 2
+	GROUP BY Posicion
