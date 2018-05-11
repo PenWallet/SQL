@@ -103,3 +103,33 @@ SELECT * FROM Reservas ORDER BY Fecha_Hora
 --5: El usuario no existe
 --8: La fecha/hora de inicio del alquiler es posterior a la de fin
 --11: La fecha de inicio y de fin son diferentes
+
+GO
+CREATE PROCEDURE EfectuarReserva (@DNI char(9), @codInst int, @fechaInicio smalldatetime, @fechaFinal smalldatetime, @codReserva int OUTPUT, @Error int = 0 OUTPUT)
+AS
+	BEGIN
+		IF(NOT EXISTS(SELECT Cod_Instalacion FROM Reservas WHERE Fecha_Hora BETWEEN @fechaInicio AND @fechaFinal))
+			BEGIN
+				IF(EXISTS(SELECT Codigo FROM Instalaciones WHERE Codigo = @codInst))
+					BEGIN
+						IF(EXISTS(SELECT DNI FROM Usuarios WHERE DNI = @DNI))
+							BEGIN
+								IF(@fechaInicio < @fechaFinal)
+									BEGIN
+										IF(datepart
+									END
+								ELSE
+									SET @Error = 8
+							END
+						ELSE
+							SET @Error = 5
+					END
+				ELSE
+					SET @Error = 4
+			END
+		ELSE
+			SET @Error = 3
+
+
+	END
+GO
