@@ -103,7 +103,7 @@ SELECT * FROM Reservas ORDER BY Fecha_Hora
 --5: El usuario no existe
 --8: La fecha/hora de inicio del alquiler es posterior a la de fin
 --11: La fecha de inicio y de fin son diferentes
-
+SELECT * FROM Reservas
 GO
 CREATE PROCEDURE EfectuarReserva (@DNI char(9), @codInst int, @fechaInicio smalldatetime, @fechaFinal smalldatetime, @codReserva int OUTPUT, @Error int = 0 OUTPUT)
 AS
@@ -116,7 +116,17 @@ AS
 							BEGIN
 								IF(@fechaInicio < @fechaFinal)
 									BEGIN
-										IF(datepart
+										IF(CAST(@fechaInicio AS date) = CAST(@fechaFinal AS date))
+											BEGIN
+												INSERT INTO Reservas(Tiempo, Fecha_Hora, ID_Usuario, Cod_Instalacion)
+												VALUES( DATEPART(hour, @fechaFinal) - DATEPART(hour, @fechaInicio),
+														@fechaInicio,
+														(SELECT ID FROM Usuarios WHERE DNI = @DNI),
+														@codInst ) --Tiene que ir entre paréntesis 
+												SET @codReserva = @@IDENTITY
+											END
+										ELSE
+											SET @Error = 11
 									END
 								ELSE
 									SET @Error = 8
@@ -129,7 +139,17 @@ AS
 			END
 		ELSE
 			SET @Error = 3
-
-
 	END
 GO
+
+SELECT * FROM Reservas
+SELECT * FROM Usuarios
+SELECT * FROM Instalaciones
+
+BEGIN TRANSACTION
+DECLARE @codReserva int
+DECLARE @Error int
+EXECUTE EfectuarReserva '59544420G',10,2018-05-13 16:00:00,2018-05-13 19:00:00, @codReserva OUTPUT, @Error OUTPUT
+PRINT 'Codigo de reserva: '+CAST(@codReserva AS varchar)
+PRINT 'Error: '+CAST(@Error AS varchar)
+
