@@ -82,28 +82,50 @@ ALTER TABLE LTJugadores
 COMMIT
 
 GO
-CREATE PROCEDURE GrabarApuesta (@IDJugador int, @IDCarrera int, @IDCaballo int, @Apuesta smallmoney, @Codigo int OUTPUT)
+CREATE PROCEDURE GrabarApuesta (@IDJugador int, @IDCarrera int, @IDCaballo int, @Apuesta smallmoney, @Codigo int = 0 OUTPUT)
 AS
-	BEGIN
-		IF(NOT EXISTS(SELECT ID FROM LTCarreras WHERE ID = @IDCarrera))
-			SET @Codigo = 2
-		ELSE
-			BEGIN
-				IF( (SELECT Fecha FROM LTCarreras WHERE ID = @IDCarrera) < CAST(GETDATE() AS date) )
-					SET @Codigo = 3
-				ELSE
-					BEGIN
-						IF( @IDCaballo != (SELECT IDCaballo FROM LTCaballosCarreras WHERE IDCarrera = @IDCarrera AND IDCaballo = @IDCaballo) )
-							SET @Codigo = 5
-						ELSE
-							BEGIN
-								IF( @Apuesta > (SELECT --¿MAX(saldo)?
-													FROM LTJugadores AS J
-														INNER JOIN LTApuntes as A
-															ON J.ID = A.IDJugador) )
-							END
-					END
+	IF(EXISTS (SELECT ID FROM LTCarreras WHERE ID = @IDCarrera))
+		BEGIN
+			IF((SELECT Fecha FROM LTCarreras WHERE ID = @IDCarrera) < CAST(CURRENT_TIMESTAMP AS date))
+				BEGIN
+					IF(EXISTS (SELECT IDCaballo FROM LTCaballosCarreras WHERE IDCarrera = @IDCarrera AND IDCaballo = @IDCaballo))
+						BEGIN
+							IF(((SELECT TOP 1 Saldo FROM LTApuntes WHERE IDJugador = @IDJugador ORDER BY Fecha desc) + (SELECT LimiteCredito FROM LTJugadores AS J WHERE ID = @IDJugador)) < 0)
+								BEGIN
+									INSERT INTO LTApuestas (Clave, IDCaballo, IDCarrera, Importe, IDJugador)
+										VALUES('watisthis', @IDCaballo, @IDCarrera, @Apuesta, @IDJugador)
 
-			END
-	END
+									--DECLARE @NuevoOrden int = SELECT(TOP 1 Orden FROM LTApuntes WHERE IDJugador = @IDJugador ORDER BY Fecha desc) + 1
+
+									INSERT INTO LTApuntes (IDJugador, Orden, Fecha, Importe, Saldo, Concepto)
+													VALUES(@IDJugador, (SELECT TOP 1 Orden+1 FROM LTApuntes WHERE IDJugador = @IDJugador ORDER BY Fecha desc), CAST(CURRENT_TIMESTAMP as date), @Apuesta, (SELECT TOP 1 Saldo FROM LTApuntes WHERE IDJugador = @IDJugador ORDER BY Fecha desc) - @Apuesta, CONCAT('Apuesta ',@@IDENTITY))
+								END
+							ELSE
+								SET @Codigo = 10
+						END
+					ELSE
+						SET @Codigo = 5
+				END
+			ELSE
+				SET @Codigo = 3
+		END
+	ELSE
+		SET @Codigo = 2 
 GO
+
+--PRUEBAS
+SELECT Nombre WHERE Sexo = H
+
+--LEL
+SELECT * FROM LTApuntes ORDER BY Fecha desc
+SELECT TOP 1 Saldo FROM LTApuntes WHERE IDJugador = 13 ORDER BY Fecha desc
+SELECT * FROM LTJugadores
+SELECT * FROM LTApuestas ORDER BY ID desc
+SELECT * FROM LTApuntes
+SELECT * FROM LTApuntes WHERE IDJugador = 1
+SELECT TOP 1 Orden FROM LTApuntes WHERE IDJugador = 1 ORDER BY Fecha desc
+
+BEGIN TRANSACTION
+INSERT INTO LTApuestas (Clave, IDCaballo, IDCarrera, Importe, IDJugador)
+				VALUES('watisthis', 1, 1, 11, 1)
+ROLLBACK
